@@ -10,7 +10,7 @@ spec:
         spec:
           containers:
           - name: hello
-              image: python:3.6-slim
-              command: ["python"]
-              args: ["/rabbitmq-utils/rmq_purge_all_queues.py"]
+            image: python:3.6-slim
+            command: ["python"]
+            args: ["/rabbitmq-utils/rmq_purge_all_queues.py"]
           restartPolicy: OnFailure
