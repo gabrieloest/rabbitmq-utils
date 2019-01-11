@@ -3,16 +3,13 @@ kind: CronJob
 metadata:
   name: hello
 spec:
-  schedule: "*/1 * * * *"
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: hello
-            image: busybox
-            args:
-            - /bin/sh
-            - -c
-            - date; echo "Hello, World!"
+          - name: python-processor
+            image: python:3.7
+            command: ["python", "/rabbitmq-util/rmq_purge_all_queues.py"]
           restartPolicy: OnFailure
