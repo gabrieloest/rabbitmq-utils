@@ -1,4 +1,4 @@
-import pika, os, logging
+import pika, os, logging, random
 
 logging.basicConfig()
 
@@ -18,6 +18,7 @@ channel.queue_declare(queue='purgetest')
 
 # send a message
 
-for number in range(100):
-    channel.basic_publish(exchange='', routing_key='purgetest', body='User information')
-    print " [x] Message sent to consumer"
+for number in range(500):
+    channel.basic_publish(exchange='', routing_key='purgetest', body='Purge test queue {}'.format(random.randint(0, 100)*number))
+    print (" [x] Message sent to consumer{}".format(number))
+    

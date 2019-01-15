@@ -2,7 +2,7 @@ import pika, os, logging, time, json, requests
 
 logging.basicConfig()
 
-def call_rabbitmq_api(host, port, user, passwd):
+def get_all_queues(host, user, passwd):
   print ("Call RabbitMQ api...")
   url = 'https://%s/api/queues' % (host)
   r = requests.get(url, auth=(user,passwd))
@@ -14,6 +14,16 @@ def get_queue_name(json_list):
   for json in json_list:
     res.append(json["name"])
   return res
+
+def set_queue_policy(host, user, passwd, vhost, queue):
+  print ("Call RabbitMQ api...")
+  url = 'https://{}/api/policies/{}/expiry-policy-{}'.format(host, vhost, queue)
+  print("Set queue policy URL: {}".format(url))
+  headers = {'Content-type': 'application/json'}
+  data = {"pattern":"(^{})".format(queue), "definition": {"message-ttl":6000, "ha-mode":"all", "ha-sync-mode":"automatic"}, "priority":10, "apply-to": "queues"}
+  print("Set queue policy DATA: {}".format(data))
+  r = requests.put(url, auth=(user,passwd), data=json.dumps(data), headers=headers)
+  return r
 
 # Parse CLODUAMQP_URL (fallback to localhost)
 print ("Parse CLODUAMQP_URL (fallback to localhost)...")
@@ -28,29 +38,24 @@ channel = connection.channel() # start a channel
 
 print ("Init params...")
 host = 'shark.rmq.cloudamqp.com'
-port = 55672
 user = 'dqoyaazj'
 passwd = 'lwBCAjY59jvmpxLEdHp5qHBTy9XOVKG0'
-res = call_rabbitmq_api(host, port, user, passwd)
+res = get_all_queues(host, user, passwd)
 q_name = get_queue_name(res.json())
 
 print ("Queues found: ")
 print (q_name)
 
-#purging the messages of the specific queue
-#queues = ["pdfprocess", "purgetest"]
-#for queue in q_name:
-#    print ("Purging messages from {} queue...", queue)
-#    channel.queue_purge(queue=queue)
-#    print "Done!"
-for queue in q_name:
-    while True:
-        (result, properties, body) = channel.basic_get(queue=queue, no_ack=False)
-        print (result)
-        if not result:
-            break
+hashm = dict((json["name"], json["vhost"]) for json in res.json())
+print (hashm)
 
-        channel.basic_ack(result.delivery_tag)
-        time.sleep(0.5)
+queues = ["pdfprocess", "purgetest"]
+for key, value in hashm.items():
+    print ("Purging messages from {} queue...", key)
+    channel.queue_purge(queue=key)
+    print("Set Messages TTL policy for the queue {} in vhost {}...".format(key, value))
+    response = set_queue_policy(host, user, passwd, value, key)
+    print("Policy code: {}".format(response))
+    print ("Done!")   
 
 connection.close()

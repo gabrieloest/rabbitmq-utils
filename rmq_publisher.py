@@ -1,4 +1,4 @@
-import pika, os, logging, time
+import pika, os, logging, time, random
 
 logging.basicConfig()
 
@@ -17,7 +17,6 @@ channel = connection.channel()
 channel.queue_declare(queue='pdfprocess')
 
 # send a message
-while True:
-    channel.basic_publish(exchange='', routing_key='pdfprocess', body='User information')
-    print (" [x] Message sent to consumer")
-    time.sleep(1)
+for number in range(500):
+    channel.basic_publish(exchange='', routing_key='pdfprocess', body='User information {}'.format(random.randint(0, 100)*number))
+    print (" [x] Message sent to consumer {}".format(number))
