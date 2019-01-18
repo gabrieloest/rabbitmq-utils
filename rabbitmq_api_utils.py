@@ -1,78 +1,89 @@
-import logging, json, requests
+import json, requests
+import logging
 
-class RabbitmqAPIUtils
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-    headers = {'Content-type': 'application/json'}
+class RabbitmqAPIUtils:
 
-    def __init__(self, user, password, host):
+    headers = {'Content-type': 'application/json'}    
+
+    def __init__(self, host, user, password):
         self.user = user
         self.password = password
-        self.url = 'https://%s/api/' % (host)
-        logging.basicConfig()
+        self.url = 'https://{}/api/'.format(host)
+       
 
-    def get_all_queues(user, passwd):
-      print ("Call RabbitMQ api...")
-      url_method = url.join('queues')
+    def get_all_queues(self):
+      logger.info("Call RabbitMQ api... {}".format(self.url))
+      url_method = self.url
+      url_method += 'queues'
       r = requests.get(url_method, auth=(self.user, self.password))
       return r
 
-    def get_queue_name(json_list):
-      print ("Get queues names...")
+    def get_queue_name(self, json_list):
+      logger.info("Get queues names...")
       res = []
       for json in json_list:
         if("deadletter" not in json["name"]):
           res.append(json["name"])
       return res
 
-    def create_queue(vhost, queue):
-      print ("Call RabbitMQ api...")
-      url_method = url.join('queues/{}/{}'.format(vhost, queue))
-      print("Create Queue URL: {}".format(url_method))      
+    def create_queue(self, vhost, queue):
+      logger.info("Call RabbitMQ api...")
+      url_method = self.url
+      url_method += ('queues/{}/{}'.format(vhost, queue))
+      logger.info("Create Queue URL: {}".format(url_method))      
       data = {"auto_delete":False,"durable":True}
-      print("Create Queue DATA: {}".format(data))
+      logger.info("Create Queue DATA: {}".format(data))
       r = requests.put(url_method, auth=(self.user, self.password), data=json.dumps(data), headers=headers)
       return r
 
-    def is_queue_exists(vhost, queue):
-      print ("Call RabbitMQ api...")
-      print("Verifying if queue {} exists...".format(queue))
-      url_method = self.url.join('queues/{}/{}'.format(vhost, queue))
+    def is_queue_exists(self, vhost, queue):
+      logger.info("Call RabbitMQ api...")
+      logger.info("Verifying if queue {} exists...".format(queue))
+      url_method = self.url
+      url_method += ('queues/{}/{}'.format(vhost, queue))
       r = requests.get(url_method, auth=(self.user, self.password))
       return r.status_code == 200
 
-    def is_exchange_exists(vhost, exchange):
-      print ("Call RabbitMQ api...")
-      print("Verifying if exchange {} exists...".format(exchange))
-      url_method = self.url.join('exchanges/{}/{}'.format(vhost, exchange))
+    def is_exchange_exists(self, vhost, exchange):
+      logger.info("Call RabbitMQ api...")
+      logger.info("Verifying if exchange {} exists...".format(exchange))
+      url_method = self.url
+      url_method += ('exchanges/{}/{}'.format(vhost, exchange))
       r = requests.get(url_method, auth=(self.user, self.password))
       return r.status_code == 200
 
-    def create_exchange(vhost, exchange):
-      print ("Call RabbitMQ api...")
-      url_method = self.url.join('exchanges/{}/{}'.format(vhost, exchange))
-      print("Create Exchange URL: {}".format(url_method))
+    def create_exchange(self, vhost, exchange):
+      logger.info("Call RabbitMQ api...")
+      url_method = self.url
+      url_method += ('exchanges/{}/{}'.format(vhost, exchange))
+      logger.info("Create Exchange URL: {}".format(url_method))
       headers = {'Content-type': 'application/json'}
       data = {"type":"direct","auto_delete":False,"durable":True}
-      print("Create Exchange DATA: {}".format(data))
+      logger.info("Create Exchange DATA: {}".format(data))
       r = requests.put(url_method, auth=(self.user, self.password), data=json.dumps(data), headers=headers)
       return r
 
-    def create_binding(vhost, exchange, queue):
-      print ("Call RabbitMQ api...")
-      url_method = self.url.join('bindings/{}/e/{}/q/{}'.format(vhost, exchange, queue))
-      print("Create Binding URL: {}".format(url_method))
+    def create_binding(self, vhost, exchange, queue):
+      logger.info("Call RabbitMQ api...")
+      url_method = self.url
+      url_method += ('bindings/{}/e/{}/q/{}'.format(vhost, exchange, queue))
+      logger.info("Create Binding URL: {}".format(url_method))
       headers = {'Content-type': 'application/json'}
       data = {"routing_key":queue}
-      print("Create Binding DATA: {}".format(data))
+      logger.info("Create Binding DATA: {}".format(data))
       r = requests.post(url_method, auth=(self.user, self.password), data=json.dumps(data), headers=headers)
       return r
 
-    def create_queue_policy(vhost, queue, dlx, dlq):
-      print ("Call RabbitMQ api...")
-      url_method = self.url.join('policies/{}/expiry-policy-{}'.format(vhost, queue))
-      print("Set queue policy URL: {}".format(url_method))
+    def create_queue_policy(self, vhost, queue, dlx, dlq):
+      logger.info("Call RabbitMQ api...")
+      url_method = self.url
+      url_method += ('policies/{}/expiry-policy-{}'.format(vhost, queue))
+      logger.info("Set queue policy URL: {}".format(url_method))
       headers = {'Content-type': 'application/json'}
       data = {"pattern":"(^{})".format(queue), "definition": {"message-ttl":6000, "ha-mode":"all", "ha-sync-mode":"automatic", "dead-letter-exchange":dlx, "dead-letter-routing-key":dlq}, "priority":10, "apply-to": "queues"}
-      print("Set queue policy DATA: {}".format(data))
+      logger.info("Set queue policy DATA: {}".format(data))
       r = requests.put(url_method, auth=(self.user, self.password), data = json.dumps(data), headers=headers)
       return r
