@@ -24,42 +24,42 @@ channel = connection.channel() # start a channel
 
 rmq_utils = rabbitmq_api_utils.RabbitmqAPIUtils(host, user, password)
 
-res = rmq_utils.get_all_queues()
-q_name = rmq_utils.get_queue_name(res.json())
+all_queues = rmq_utils.get_all_queues()
+queues_names = rmq_utils.get_queue_name(all_queues.json())
 
 logger.info("Queues found: ")
-logger.info(q_name)
+logger.info(queues_names)
 
-hashm = dict((json["name"], json["vhost"]) for json in res.json())
-logger.info(hashm)
-filtered_dict = {k:v for (k,v) in hashm.items() if k in q_name}
+queue_name_vhost = dict((json["name"], json["vhost"]) for json in all_queues.json())
+logger.info(queue_name_vhost)
+queue_name_vhost = {k:v for (k,v) in queue_name_vhost.items() if k in queues_names}
 
-for key in filtered_dict:
+for key in queue_name_vhost:
   logger.info(key)
-  dlx = "deadletter.{}".format(filtered_dict.get(key))
+  dead_letter_exchange = "deadletter.{}".format(queue_name_vhost.get(key))
   
-  exists = rmq_utils.is_exchange_exists(filtered_dict.get(key), dlx)
+  exists = rmq_utils.is_exchange_exists(queue_name_vhost.get(key), dead_letter_exchange)
   if not exists:
-    logger.info("Dead leter exchange does not exist in the vhost {}. Creating...".format(filtered_dict.get(key)))
-    rmq_utils.create_exchange(filtered_dict.get(key), dlx)
+    logger.info("Dead leter exchange does not exist in the vhost {}. Creating...".format(queue_name_vhost.get(key)))
+    rmq_utils.create_exchange(queue_name_vhost.get(key), dead_letter_exchange)
 
 
-for key, value in filtered_dict.items():
+for key, value in queue_name_vhost.items():
   logger.info("Purging messages from {} queue...".format(key))
   channel.queue_purge(queue=key)
 
-  dlx = "deadletter.{}".format(value)
-  dlq = "deadletter.{}".format(key)
+  dead_letter_exchange = "deadletter.{}".format(value)
+  dead_letter_queue = "deadletter.{}".format(key)
 
-  exists_queue = rmq_utils.is_queue_exists(value, dlq)
+  exists_queue = rmq_utils.is_queue_exists(value, dead_letter_queue)
   if not exists_queue:
-    logger.info("Create Dead Letter Queue {}....".format(dlq))
-    queue_response = rmq_utils.create_queue(value, dlq)
+    logger.info("Create Dead Letter Queue {}....".format(dead_letter_queue))
+    queue_response = rmq_utils.create_queue(value, dead_letter_queue)
     logger.info("Queue code: {}".format(queue_response))
-    rmq_utils.create_bindind(value, dlx, dlq)
+    rmq_utils.create_bindind(value, dead_letter_exchange, dead_letter_queue)
       
     logger.info("Set Messages TTL and Dead Letter Exchange policies for the queue {} in vhost {}...".format(key, value))
-    policy_response = rmq_utils.create_queue_policy(value, key, dlx, dlq)
+    policy_response = rmq_utils.create_queue_policy(value, key, dead_letter_exchange, dead_letter_queue)
     logger.info("Policy code: {}".format(policy_response))
 
   logger.info("Done!")   
