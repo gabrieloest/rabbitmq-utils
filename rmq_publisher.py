@@ -1,4 +1,4 @@
-import pika, os, logging, time, random
+import pika, os, logging, random
 
 logging.basicConfig()
 
@@ -13,10 +13,15 @@ connection = pika.BlockingConnection(params)
 # start a channel
 channel = connection.channel()
 
+queue = input("Please enter queue name: ")
+number_of_messages = int(input("Please enter how many messages you want to send: "))
+
 # Declare a queue
-channel.queue_declare(queue='pdfprocess')
+channel.queue_declare(queue=queue)
 
 # send a message
-for number in range(500):
-    channel.basic_publish(exchange='', routing_key='pdfprocess', body='User information {}'.format(random.randint(0, 100)*number))
-    print (" [x] Message sent to consumer {}".format(number))
+
+for number in range(number_of_messages):
+    channel.basic_publish(exchange='', routing_key=queue, body='Queue {} message number {}'.format(queue, random.randint(0, 100)*number))
+    print (" [x] Message {} sent to queue {}".format(number, queue))
+    
