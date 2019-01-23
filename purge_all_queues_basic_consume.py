@@ -67,9 +67,11 @@ class CountCallback(object):
         self.routing_key = routing_key
 
     def __call__(self, channel, method, properties, body):
+        logger.info("Message processed count {}".format(self.count))
+        logger.info("Republish message to {}".format(self.routing_key))
         channel.basic_publish(
             exchange='', routing_key=self.routing_key, body=body)
-        print("")
+
         self.count -= 1
         if not self.count:
             channel.stop_consuming()
@@ -85,7 +87,7 @@ for key, value in queue_name_vhost.items():
             dead_letter_queue))
         queue_response = rmq_utils.create_queue(value, dead_letter_queue)
         logger.info("Queue code: {}".format(queue_response))
-        rmq_utils.create_bindind(
+        rmq_utils.create_binding(
             value, dead_letter_exchange, dead_letter_queue)
 
         logger.info(
@@ -96,10 +98,14 @@ for key, value in queue_name_vhost.items():
 
     print('Processing queue {}'.format(key))
     queue = channel.queue_declare(key)
-    callback = CountCallback(queue.method.message_count,
-                             dead_letter_exchange, dead_letter_queue)
-    channel.basic_consume(callback, queue=key)
-    channel.start_consuming()
+    message_count = queue.method.message_count
+    logger.info("Check message count... total: {}".format(message_count))
+    if(message_count > 0):
+        logger.info("create CountCallback")
+        callback = CountCallback(queue.method.message_count,
+                                dead_letter_exchange, dead_letter_queue)
+        channel.basic_consume(callback, queue=key, no_ack=True)
+        channel.start_consuming()
 
     logger.info("Done!")
 
