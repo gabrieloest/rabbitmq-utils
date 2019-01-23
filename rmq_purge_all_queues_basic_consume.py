@@ -59,7 +59,7 @@ class CountCallback(object):
         self.routing_key = routing_key
 
     def __call__(self, channel, method, properties, body):
-        channel.basic_publish(exchange='', routing_key=routing_key, body=body)
+        channel.basic_publish(exchange='', routing_key=self.routing_key, body=body)
         print ("")
         self.count -= 1
         if not self.count:
