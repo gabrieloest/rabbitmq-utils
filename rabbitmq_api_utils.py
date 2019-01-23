@@ -87,8 +87,12 @@ class RabbitmqAPIUtils:
         url_method += ('policies/{}/expiry-policy-{}'.format(vhost, queue))
         logger.info("Set queue policy URL: {}".format(url_method))
         headers = {'Content-type': 'application/json'}
-        data = {"pattern": "(^{})".format(queue), "definition": {"message-ttl": 6000, "ha-mode": "all", "ha-sync-mode": "automatic",
-                                                                 "dead-letter-exchange": dlx, "dead-letter-routing-key": dlq}, "priority": 10, "apply-to": "queues"}
+        data = {"pattern": "(^{})".format(queue), "definition": {"message-ttl": 6000,
+        "ha-mode": "all",
+        "ha-sync-mode": "automatic",
+        "dead-letter-exchange": dlx,
+        "dead-letter-routing-key": dlq},
+        "priority": 10, "apply-to": "queues"}
         logger.info("Set queue policy DATA: {}".format(data))
         r = requests.put(url_method, auth=(self.user, self.password),
                          data=json.dumps(data), headers=headers)

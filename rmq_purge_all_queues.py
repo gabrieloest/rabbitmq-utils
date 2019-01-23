@@ -1,15 +1,24 @@
 import pika
 import os
 import logging
+import yaml
 import rabbitmq_api_utils
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-logger.info("Init params...")
-host = 'shark.rmq.cloudamqp.com'
-user = 'dqoyaazj'
-password = 'lwBCAjY59jvmpxLEdHp5qHBTy9XOVKG0'
+logger.info('Loading configurations....')
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+
+rabbitmq = cfg['rabbitmq']
+host = rabbitmq['host']
+user = rabbitmq['user']
+password = rabbitmq['password']
+
+logger.info('host: {}'.format(host))
+logger.info('user: {}'.format(user))
+logger.info('password: {}'.format(password))
 
 # Parse CLODUAMQP_URL (fallback to localhost)
 logger.info("Parse CLODUAMQP_URL (fallback to localhost)...")
@@ -64,7 +73,7 @@ for key, value in queue_name_vhost.items():
             dead_letter_queue))
         queue_response = rmq_utils.create_queue(value, dead_letter_queue)
         logger.info("Queue code: {}".format(queue_response))
-        rmq_utils.create_bindind(
+        rmq_utils.create_binding(
             value, dead_letter_exchange, dead_letter_queue)
 
         logger.info(
