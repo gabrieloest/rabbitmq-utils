@@ -7,7 +7,7 @@ import rabbitmq_api_utils
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-logger.infor('Loading configurations....')
+logger.info('Loading configurations....')
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
@@ -15,7 +15,6 @@ rabbitmq = cfg['rabbitmq']
 host = rabbitmq['host']
 user = rabbitmq['user']
 password = rabbitmq['password']
-
 
 logger.info('host: {}'.format(host))
 logger.info('user: {}'.format(user))
@@ -55,7 +54,7 @@ for key in queue_name_vhost:
     exists = rmq_utils.is_exchange_exists(
         queue_name_vhost.get(key), dead_letter_exchange)
     if not exists:
-        logger.info("Dead leter exchange does not exist in the vhost {}. Creating...".format(
+        logger.info('Dead leter exchange does not exist in the vhost {}. Creating...'.format(
             queue_name_vhost.get(key)))
         rmq_utils.create_exchange(
             queue_name_vhost.get(key), dead_letter_exchange)

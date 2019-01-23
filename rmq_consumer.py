@@ -2,8 +2,30 @@ import pika
 import os
 import logging
 import time
+import yaml
 
-logging.basicConfig()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info('Loading configurations....')
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+
+rabbitmq = cfg['rabbitmq']
+host = rabbitmq['host']
+user = rabbitmq['user']
+password = rabbitmq['password']
+
+logger.info('host: {}'.format(host))
+logger.info('user: {}'.format(user))
+logger.info('password: {}'.format(password))
+
+# Parse CLODUAMQP_URL (fallback to localhost)
+logger.info("Parse CLODUAMQP_URL (fallback to localhost)...")
+url = os.environ.get(
+    'CLOUDAMQP_URL', 'amqp://{}:{}@{}/dqoyaazj'.format(user, password, host))
+params = pika.URLParameters(url)
+params.socket_timeout = 5
 
 
 def pdf_process_function(msg):
@@ -12,12 +34,6 @@ def pdf_process_function(msg):
     print("PDF processing finished")
     return
 
-
-# Parse CLODUAMQP_URL (fallback to localhost)
-url = os.environ.get(
-    'CLOUDAMQP_URL', 'amqp://dqoyaazj:lwBCAjY59jvmpxLEdHp5qHBTy9XOVKG0@shark.rmq.cloudamqp.com/dqoyaazj')
-params = pika.URLParameters(url)
-params.socket_timeout = 5
 
 # Connect to CloudAMQP
 connection = pika.BlockingConnection(params)
