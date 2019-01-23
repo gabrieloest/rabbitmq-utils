@@ -1,13 +1,22 @@
-import pika, os, logging, time, json
+import pika, os, logging, time, json, yaml
 import rabbitmq_api_utils
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-logger.info("Init params...")
-host = 'shark.rmq.cloudamqp.com'
-user = 'dqoyaazj'
-password = 'lwBCAjY59jvmpxLEdHp5qHBTy9XOVKG0'
+logger.infor('Loading configurations....')
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+
+rabbitmq = cfg['rabbitmq']
+host = rabbitmq['host']
+user = rabbitmq['user']
+password = rabbitmq['password']
+
+
+logger.info('host: {}'.format(host))
+logger.info('user: {}'.format(user))
+logger.info('password: {}'.format(password))
 
 # Parse CLODUAMQP_URL (fallback to localhost)
 logger.info("Parse CLODUAMQP_URL (fallback to localhost)...")
@@ -37,7 +46,7 @@ queue_name_vhost = {k:v for (k,v) in queue_name_vhost.items() if k in queues_nam
 for key in queue_name_vhost:
   logger.info(key)
   dead_letter_exchange = "deadletter.{}".format(queue_name_vhost.get(key))
-  
+
   exists = rmq_utils.is_exchange_exists(queue_name_vhost.get(key), dead_letter_exchange)
   if not exists:
     logger.info("Dead leter exchange does not exist in the vhost {}. Creating...".format(queue_name_vhost.get(key)))
@@ -66,19 +75,19 @@ for key, value in queue_name_vhost.items():
     queue_response = rmq_utils.create_queue(value, dead_letter_queue)
     logger.info("Queue code: {}".format(queue_response))
     rmq_utils.create_bindind(value, dead_letter_exchange, dead_letter_queue)
-      
+
     logger.info("Set Messages TTL and Dead Letter Exchange policies for the queue {} in vhost {}...".format(key, value))
     policy_response = rmq_utils.create_queue_policy(value, key, dead_letter_exchange, dead_letter_queue)
     logger.info("Policy code: {}".format(policy_response))
-  
+
   print('Processing queue {}'.format(key))
   queue = channel.queue_declare(key)
   callback = CountCallback(queue.method.message_count, dead_letter_exchange, dead_letter_queue)
   channel.basic_consume(callback, queue=key)
   channel.start_consuming()
 
-  logger.info("Done!")   
+  logger.info("Done!")
 
 channel.close()
 connection.close()
- 
+
