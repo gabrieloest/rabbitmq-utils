@@ -6,5 +6,5 @@ setup(name='rabbitmq-utils',
       author='Gabriel Oest',
       author_email='bieloest@gmail.com',
       url='https://github.com/gabrieloest/rabbitmq-utils',
-      packages=['distutils', 'distutils.command', 'pika', 'requests', 'pyyaml']
+      packages=['pika', 'requests', 'pyyaml']
       )

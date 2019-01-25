@@ -22,14 +22,6 @@ class RabbitmqAPIUtils:
         r = requests.get(url_method, auth=(self.user, self.password))
         return r
 
-    def get_queue_name(self, json_list):
-        logger.info("Get queues names...")
-        res = []
-        for item in json_list:
-            if("deadletter" not in item["name"]):
-                res.append(item["name"])
-        return res
-
     def create_queue(self, vhost, queue):
         logger.info("Call RabbitMQ api...")
         url_method = self.url

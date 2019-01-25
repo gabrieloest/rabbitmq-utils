@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 logger.info('Loading configurations....')
-with open("config.yml", 'r') as ymlfile:
+with open("./config/config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
 rabbitmq = cfg['rabbitmq']
