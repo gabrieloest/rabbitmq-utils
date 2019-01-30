@@ -94,7 +94,8 @@ for key, value in queue_name_vhost.items():
             value, dead_letter_exchange, dead_letter_queue)
 
         logger.info(
-            "Set Messages TTL and Dead Letter Exchange policies for the queue {} in vhost {}...".format(key, value))
+            "Set Messages TTL and Dead Letter Exchange policies for the queue"
+            "{} in vhost {}...".format(key, value))
         policy_response = rmq_utils.create_queue_policy(
             value, key, dead_letter_exchange, dead_letter_queue)
         logger.info("Policy code: {}".format(policy_response))
@@ -106,7 +107,7 @@ for key, value in queue_name_vhost.items():
     if(message_count > 0):
         logger.info("create CountCallback")
         callback = CountCallback(queue.method.message_count,
-                                dead_letter_exchange, dead_letter_queue)
+                                 dead_letter_exchange, dead_letter_queue)
         channel.basic_consume(callback, queue=key, no_ack=True)
         channel.start_consuming()
 
