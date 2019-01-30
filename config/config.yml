@@ -1,4 +1,4 @@
 rabbitmq:
-  host:
-  user:
-  password:
+  host: shark.rmq.cloudamqp.com
+  user: dqoyaazj
+  password: lwBCAjY59jvmpxLEdHp5qHBTy9XOVKG0
