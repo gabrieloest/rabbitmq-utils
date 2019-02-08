@@ -6,4 +6,5 @@ rabbitmq:
   host:
   user:
   password:
+  vhost:
 ```

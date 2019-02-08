@@ -2,28 +2,20 @@ import pika
 import os
 import logging
 import random
-import yaml
+import config_resolver
+import rabbitmq_api_utils
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-logger.info('Loading configurations....')
-with open("./config/config.yml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
+config = config_resolver.ConfigResolver(logger)
 
-rabbitmq = cfg['rabbitmq']
-host = rabbitmq['host']
-user = rabbitmq['user']
-password = rabbitmq['password']
+server_config = config.load_server_config()
 
-logger.info('host: {}'.format(host))
-logger.info('user: {}'.format(user))
-logger.info('password: {}'.format(password))
-
-# Parse CLODUAMQP_URL (fallback to localhost)
 logger.info("Parse CLODUAMQP_URL (fallback to localhost)...")
-url = os.environ.get(
-    'CLOUDAMQP_URL', 'amqp://{}:{}@{}/dqoyaazj'.format(user, password, host))
+url = os.environ.get('CLOUDAMQP_URL', 'amqp://{}:{}@{}/{}'
+                     .format(server_config['user'], server_config['password'],
+                             server_config['host'], server_config['vhost']))
 params = pika.URLParameters(url)
 params.socket_timeout = 5
 
@@ -33,15 +25,27 @@ connection = pika.BlockingConnection(params)
 # start a channel
 channel = connection.channel()
 
-queues_list = ['pdfprocess', 'purgetest', 'dlqtransfer']
+rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['host'], server_config['user'], server_config['password'])
 
-for queue in queues_list:
+response = rabbitmq_api_utils.get_all_queues_by_vhost(server_config['vhost'])
+
+if(response.status_code is not 200):
+    logger.error('Queue not found!')
+    exit()
+
+queues = response.json()
+
+number_of_messages = int(input("Please enter number of messages to send: "))
+
+for queue in queues:
 
     # Declare a queue
-    channel.queue_declare(queue=queue)
+    channel.queue_declare(queue=queue['name'], durable=queue['durable'])
 
     # send a message
-    for number in range(500):
-        channel.basic_publish(exchange='', routing_key=queue, body='Queue {} message number {}'.format(
-            queue, random.randint(0, 100)*number))
-        print(" [x] Message {} sent to queue {}".format(number, queue))
+    for number in range(number_of_messages):
+        channel.basic_publish(exchange='', routing_key=queue['name'],
+                              body='Queue {} message number {}'
+                                   .format(queue['name'],
+                                           random.randint(0, 100)*number))
+        logger.info(" [x] Message {} sent to queue {}".format(number, queue['name']))

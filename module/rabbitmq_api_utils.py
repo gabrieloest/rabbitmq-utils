@@ -16,9 +16,23 @@ class RabbitmqAPIUtils:
         self.url = 'https://{}/api/'.format(host)
 
     def get_all_queues(self):
-        logger.info("Call RabbitMQ api... {}".format(self.url))
         url_method = self.url
         url_method += 'queues'
+        logger.info("Call RabbitMQ api... {}".format(url_method))
+        r = requests.get(url_method, auth=(self.user, self.password))
+        return r
+
+    def get_all_queues_by_vhost(self, vhost):
+        url_method = self.url
+        url_method += 'queues/{}'.format(vhost)
+        logger.info("Call RabbitMQ api... {}".format(url_method))
+        r = requests.get(url_method, auth=(self.user, self.password))
+        return r
+
+    def get_queue_by_name(self, vhost, queue_name):
+        url_method = self.url
+        url_method += 'queues/{}/{}'.format(vhost, queue_name)
+        logger.info("Call RabbitMQ api... {}".format(url_method))
         r = requests.get(url_method, auth=(self.user, self.password))
         return r
 

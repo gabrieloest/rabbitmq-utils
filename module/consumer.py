@@ -2,36 +2,28 @@ import pika
 import os
 import logging
 import time
-import yaml
+import config_resolver
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-logger.info('Loading configurations....')
-with open("./config/config.yml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
+server_config = config_resolver.ConfigResolver(logger)
 
-rabbitmq = cfg['rabbitmq']
-host = rabbitmq['host']
-user = rabbitmq['user']
-password = rabbitmq['password']
-
-logger.info('host: {}'.format(host))
-logger.info('user: {}'.format(user))
-logger.info('password: {}'.format(password))
-
-# Parse CLODUAMQP_URL (fallback to localhost)
 logger.info("Parse CLODUAMQP_URL (fallback to localhost)...")
-url = os.environ.get(
-    'CLOUDAMQP_URL', 'amqp://{}:{}@{}/dqoyaazj'.format(user, password, host))
+url = os.environ.get('CLOUDAMQP_URL', 'amqp://{}:{}@{}/{}'
+                     .format(server_config['user'], server_config['password'],
+                             server_config['host'], server_config['vhost']))
 params = pika.URLParameters(url)
 params.socket_timeout = 5
 
 
-def pdf_process_function(msg):
-    print("PDF processing")
-    time.sleep(5)  # delays for 5 seconds
-    print("PDF processing finished")
+def message_process_function(channel, method, msg):
+    print("Processing message...")
+    time.sleep(1)
+    tag = method.delivery_tag
+    print("Message {} processing finished".format(tag))
+    channel.basic_ack(delivery_tag=tag)
+    print("Message ack OK!")
     return
 
 
@@ -39,17 +31,16 @@ def pdf_process_function(msg):
 connection = pika.BlockingConnection(params)
 channel = connection.channel()  # start a channel
 
-# create a function which is called on incoming messages
-
 
 def callback(ch, method, properties, body):
-    pdf_process_function(body)
+    message_process_function(ch, method, body)
 
 
-# set up subscription on the queue
+queue = input("Please enter queue name: ")
+
+channel.basic_qos(prefetch_count=1)
 channel.basic_consume(callback,
-                      queue='pdfprocess',
-                      no_ack=True)
+                      queue=queue)
 
 # start consuming (blocks)
 channel.start_consuming()
