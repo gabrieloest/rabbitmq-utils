@@ -7,7 +7,9 @@ import config_resolver
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-server_config = config_resolver.ConfigResolver(logger)
+config = config_resolver.ConfigResolver(logger)
+
+server_config = config.load_server_config()
 
 logger.info("Parse CLODUAMQP_URL (fallback to localhost)...")
 url = os.environ.get('CLOUDAMQP_URL', 'amqp://{}:{}@{}/{}'
@@ -39,8 +41,7 @@ def callback(ch, method, properties, body):
 queue = input("Please enter queue name: ")
 
 channel.basic_qos(prefetch_count=1)
-channel.basic_consume(callback,
-                      queue=queue)
+channel.basic_consume(callback, queue=queue)
 
 # start consuming (blocks)
 channel.start_consuming()
