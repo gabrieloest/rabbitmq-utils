@@ -13,7 +13,7 @@ class RabbitmqAPIUtils:
     def __init__(self, host, user, password):
         self.user = user
         self.password = password
-        self.url = 'https://{}/api/'.format(host)
+        self.url = '{}/api/'.format(host)
 
     def get_all_queues(self):
         url_method = self.url
