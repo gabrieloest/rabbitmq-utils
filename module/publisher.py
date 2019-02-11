@@ -25,7 +25,9 @@ connection = pika.BlockingConnection(params)
 # start a channel
 channel = connection.channel()
 
-rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['host'], server_config['user'], server_config['password'])
+rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['host'],
+                                                         server_config['user'],
+                                                         server_config['password'])
 
 queue_name = input("Please enter queue name: ")
 
