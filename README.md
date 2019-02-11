@@ -11,6 +11,7 @@ This Project contains basic actions to execute on a RabbitMQ broker.
 1. Create file `config/server-config.yml` with the following content:
 ```
 rabbitmq:
+  protocol:
   host:
   user:
   password:
