@@ -25,7 +25,10 @@ connection = pika.BlockingConnection(params)
 # start a channel
 channel = connection.channel()
 
-rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['host'], server_config['user'], server_config['password'])
+rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['protocol'],
+                                                         server_config['host'],
+                                                         server_config['user'],
+                                                         server_config['password'])
 
 response = rabbitmq_api_utils.get_all_queues_by_vhost(server_config['vhost'])
 

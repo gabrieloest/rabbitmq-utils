@@ -25,7 +25,8 @@ connection = pika.BlockingConnection(params)
 # start a channel
 channel = connection.channel()
 
-rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['host'],
+rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['protocol'],
+                                                         server_config['host'],
                                                          server_config['user'],
                                                          server_config['password'])
 
