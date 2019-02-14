@@ -11,10 +11,10 @@ config = config_resolver.ConfigResolver(logger)
 
 server_config = config.load_server_config()
 
-logger.info("Parse CLODUAMQP_URL (fallback to localhost)...")
-url = os.environ.get('CLOUDAMQP_URL', 'amqp://{}:{}@{}/{}'
+logger.info("Parse URL (fallback to localhost)...")
+url = os.environ.get('URL', 'amqp://{}:{}@{}:{}/{}'
                      .format(server_config['user'], server_config['password'],
-                             server_config['host'], server_config['vhost']))
+                             server_config['host'], server_config['amqp-port'], server_config['vhost']))
 params = pika.URLParameters(url)
 params.socket_timeout = 5
 

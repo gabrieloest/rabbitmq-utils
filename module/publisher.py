@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 config = config_resolver.ConfigResolver(logger)
 server_config = config.load_server_config()
 
-logger.info("Parse CLODUAMQP_URL (fallback to localhost)...")
-url = os.environ.get('CLOUDAMQP_URL', 'amqp://{}:{}@{}/{}'
+logger.info("Parse URL (fallback to localhost)...")
+url = os.environ.get('URL', 'amqp://{}:{}@{}:{}/{}'
                      .format(server_config['user'], server_config['password'],
-                             server_config['host'], server_config['vhost']))
+                             server_config['host'], server_config['amqp-port'], server_config['vhost']))
+logger.info(url)
 params = pika.URLParameters(url)
 params.socket_timeout = 5
 
@@ -27,6 +28,7 @@ channel = connection.channel()
 
 rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['protocol'],
                                                          server_config['host'],
+                                                         server_config['http-port'],
                                                          server_config['user'],
                                                          server_config['password'])
 
@@ -34,7 +36,7 @@ queue_name = input("Please enter queue name: ")
 
 response = rabbitmq_api_utils.get_queue_by_name(server_config['vhost'], queue_name)
 
-if(response.status_code is not 200):
+if response.status_code is not 200:
     logger.error('Queue not found!')
     exit()
 

@@ -19,5 +19,6 @@ class ConfigResolver:
 
         rabbitmq = server_config['rabbitmq']
         self.log_configurations(rabbitmq)
+        rabbitmq['vhost'] = rabbitmq['vhost'].replace("/", "%2f")
 
         return rabbitmq
