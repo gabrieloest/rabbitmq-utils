@@ -13,6 +13,8 @@ This Project contains basic actions to execute on a RabbitMQ broker.
 rabbitmq:
   protocol:
   host:
+  amqp-port:
+  http-port:
   user:
   password:
   vhost:
