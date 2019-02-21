@@ -9,7 +9,7 @@ This Project contains basic actions to execute on a RabbitMQ broker.
 
 ## Configuration
 1. Create file `config/server-config.yml` with the following content:
-```
+```yaml
 rabbitmq:
   protocol:
   host:
@@ -21,27 +21,27 @@ rabbitmq:
 ```
 
 ## Usage
-```
+```bash
 git clone https://github.com/gabrieloest/rabbitmq-utils
 ```
-```
+```bash
 cd rabbitmq-utils
 ```
-```
+```bash
 python -m pip install -r requirements.txt
 ```
 
 ### To run the `publisher.py` script
 At cmd prompt:
-```
+```bash
 python module/publisher.py
 ```
 A message will appear:
-```
+```bash
 Please enter queue name:
 ```
 If the queue name is valid, the script start to publish messages into the selected queue. To stop, press `ctrl + c`
-```
+```bash
 INFO:__main__: [x] Message 1 sent to queue mapfilter
 INFO:__main__: [x] Message 2 sent to queue mapfilter
 INFO:__main__: [x] Message 3 sent to queue mapfilter
@@ -51,15 +51,15 @@ INFO:__main__: [x] Message 5 sent to queue mapfilter
 
 ### To run the `publisher_all.py` script
 At cmd prompt:
-```
+```bash
 python module/publisher_all.py
 ```
 A message will appear:
-```
+```bash
 Please enter number of messages to send:
 ```
 The script will send the amount of messages you choose and then stops.
-```
+```bash
 INFO:__main__: [x] Message 0 sent to queue dlqtransfer
 INFO:__main__: [x] Message 0 sent to queue mapfilter
 INFO:__main__: [x] Message 0 sent to queue pdfprocess
@@ -68,15 +68,15 @@ INFO:__main__: [x] Message 0 sent to queue purgetest
 
 ### To run the `consumer.py` script
 At cmd prompt:
-```
+```bash
 python module/publisher.py
 ```
 A message will appear:
-```
+```bash
 Please enter queue name:
 ```
 If the queue name is valid, the script start to consume the messages from the selected queue. To stop, press `ctrl + c`
-```
+```bash
 Message 1 processing finished
 Message ack OK!
 Processing message...
