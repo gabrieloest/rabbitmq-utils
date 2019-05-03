@@ -48,10 +48,11 @@ channel.queue_declare(queue=queue['name'], durable=queue['durable'])
 # send a message
 number = 1
 while True:
-    channel.basic_publish(exchange='',
+    publish_response =  channel.basic_publish(exchange='',
                           routing_key=queue['name'],
                           body='Queue {} message number {}'
                                .format(queue['name'], random.randint(0, 100)*number))
+    logger.info(publish_response)
     logger.info(" [x] Message {} sent to queue {}".format(number, queue['name']))
     number += 1
     time.sleep(1)

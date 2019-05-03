@@ -33,10 +33,14 @@ rabbitmq_api_utils = rabbitmq_api_utils.RabbitmqAPIUtils(server_config['protocol
 
 queues = list(rabbitmq_api_utils.get_all_queues().json())
 
+print('Total number of queues: {}'.format(len(queues)))
+
 queues_sorted_by_vhost = sorted(queues, key=lambda k: k['vhost'])
 
 vhost_queues = dict((k, len(list(g))) for k, g in groupby(queues_sorted_by_vhost, lambda queue: queue['vhost']))
 
+
+print('Number of queues by vhost: ')
 for k, v in vhost_queues.items():
     print('{} - {}'.format(k, v))
 
@@ -45,5 +49,6 @@ queues_sorted_by_node = sorted(queues, key=lambda k: k['node'])
 
 node_queues = dict((k, len(list(g))) for k, g in groupby(queues_sorted_by_node, lambda queue: queue['node']))
 
+print('Number of queues by node: ')
 for k, v in node_queues.items():
     print('{} - {}'.format(k, v))

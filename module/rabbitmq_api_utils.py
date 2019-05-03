@@ -104,3 +104,10 @@ class RabbitmqAPIUtils:
         r = requests.put(url_method, auth=(self.user, self.password),
                          data=json.dumps(data), headers=headers)
         return r
+
+    def get_all_permissions(self):
+        url_method = self.url
+        url_method += 'permissions'
+        logger.info("Call RabbitMQ api... {}".format(url_method))
+        r = requests.get(url_method, auth=(self.user, self.password))
+        return r
